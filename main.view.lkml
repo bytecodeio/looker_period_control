@@ -1239,6 +1239,7 @@ view: main {
               when ${event_date_tz_convert} between
                 {%- case '@{database_type}' -%}
                   {%- when "bigquery" %} date_add(${start_date_dim}, interval -{{ _range_start }} DAY) and date_add(${end_date_dim}, interval -{{ _range_end }} DAY) then date_diff(date_add(${start_date_dim}, interval -{{ _range_start }} DAY),  date_add(${end_date_dim}, interval -{{ _range_end }} DAY), SECOND)
+                  {%- when "mysql" %} date_add(${start_date_dim}, interval -{{ _range_start }} day) and date_add(${end_date_dim}, interval -{{ _range_end }} day) then timestampdiff(second, date_add(${start_date_dim}, interval -{{ _range_start }} day),  date_add(${end_date_dim}, interval -{{ _range_end }} day))
                   {%- else %} dateadd('days', -{{ _range_start }}, ${start_date_dim}) and dateadd('days', -{{ _range_end }}, ${end_date_dim}) then datediff('seconds',  dateadd('days', -{{ _range_start }}, ${start_date_dim}),  dateadd('days', -{{ _range_end }}, ${end_date_dim}))
                 {%- endcase %}
 
