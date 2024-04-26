@@ -367,7 +367,7 @@ view: main {
                 {%- when "redshift" -%} convert_timezone('@{database_time_zone}', '{{ _query._query_timezone }}', getdate())
                 {%- when "snowflake" -%} convert_timezone('@{database_time_zone}', '{{ _query._query_timezone }}', current_timestamp)
                 {%- when "bigquery" %} datetime(current_timestamp(), '{{ _query._query_timezone }}')
-                {%- when "mysql" -%} convert_tz(cur_date(), '@{database_time_zone}', '{{ _query._query_timezone }}')
+                {%- when "mysql" -%} convert_tz(curdate(), '@{database_time_zone}', '{{ _query._query_timezone }}')
               {%- endcase -%}
 
       {%- else -%}
@@ -375,7 +375,7 @@ view: main {
       {%- when "redshift" -%} getdate()
       {%- when "snowflake" -%} current_timestamp
       {%- when "bigquery" %} datetime(current_timestamp())
-      {%- when "mysql" -%} cur_date()
+      {%- when "mysql" -%} curdate()
       {%- endcase -%}
       {%- endif -%};;
     convert_tz: no
