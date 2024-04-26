@@ -36,9 +36,10 @@ constant: database_time_zone {
 
 constant: database_type {
   # Options:
-  # 1. redshift
-  # 2. bigquery
+  # 1. bigquery
+  # 2. redshift
   # 3. snowflake
-  value: "redshift"
+  # 4. mysql
+  value: "bigquery"
   export: override_optional
 }
