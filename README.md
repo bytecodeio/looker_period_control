@@ -34,8 +34,8 @@ To use the Looker Period Control Block, you will need to add the external packag
 Add the following code to your manifest file. This will allow you to use the block in your project via a `include:`.
 ```yaml
 remote_dependency: looker_period_control {
-  url: "https://github.com/Cold-Bore-Capital/looker_period_control"
-  # Find the latest tag hash here https://github.com/Cold-Bore-Capital/looker_period_control/tags
+  url: "https://github.com/bytecodeio/looker_period_control"
+  # Find the latest tag hash here https://github.com/bytecodeio/looker_period_control/tags
   ref: "v1.1.7"
 }
 ```
@@ -49,8 +49,8 @@ Example: Set the database type to BigQuery
 
 ```yaml
 remote_dependency: looker_period_control {
-  url: "https://github.com/Cold-Bore-Capital/looker_period_control.git"
-  # Find the latest tag hash here https://github.com/Cold-Bore-Capital/looker_period_control/tags
+  url: "https://github.com/bytecodeio/looker_period_control.git"
+  # Find the latest tag hash here https://github.com/bytecodeio/looker_period_control/tags
   ref: "v1.1.7"
   override_constant: database_type {
     value: "bigquery"
