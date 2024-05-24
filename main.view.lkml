@@ -777,7 +777,6 @@ view: main {
   # *************************************************************************************
 
   dimension: period {
-    view_label: "@{period_control_group_title}"
     label: "Period"
     group_label: "Pivot Dimensions"
     type: string
@@ -837,21 +836,30 @@ view: main {
       {%- when "mysql" %} date_add(${end_date_dim}, interval -{{ _range_end }} day)
       {%- else %} dateadd('days', -{{ _range_end }}, ${end_date_dim})
       {%- endcase %}
-      then {{ _period_name }}
+      then
+      {%- if display_dates_in_period_labels._parameter_value == 'true' and '@{database_type}' == "mysql" %}
+      concat(
+      {%- endif -%}
+      {{ _period_name }}
 
       {%- if display_dates_in_period_labels._parameter_value == 'true' -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' (' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(${start_date_dim}, interval -{{ _range_start }} DAY))
-      {%- when "mysql" %} || ' (' || date_format(date_add(${start_date_dim}, interval -{{ _range_start }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' (', date_format(date_add(${start_date_dim}, interval -{{ _range_start }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' (' || to_char(dateadd('days', -{{ _range_start }}, ${start_date_dim}), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
       {%- if _range_size != 1 -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' to ' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(${end_date_dim}, interval -{{ _range_end }} DAY))
-      {%- when "mysql" %} || ' to ' || date_format(date_add(${end_date_dim}, interval -{{ _range_end }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' to ', date_format(date_add(${end_date_dim}, interval -{{ _range_end }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' to ' || to_char(dateadd('days', -{{ _range_end }}, ${end_date_dim}), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
-      {%- endif %} || ')'
+      {%- endif %}
+      {%- if '@{database_type}' == "mysql" %}
+      , ')')
+      {%- else %}
+      || ')'
+      {%- endif -%}
       {%- endif -%}
       {%- endif -%}
 
@@ -864,23 +872,32 @@ view: main {
       {%- when "mysql" %} date_add(${start_date_dim}, interval -{{ _range_start }} day) and date_add(${end_date_dim}, interval -{{ _range_end | minus: 1 }} day)
       {%- else %} dateadd('days', -{{ _range_start }}, ${start_date_dim}) and dateadd('days', -{{ _range_end | minus: 1 }}, ${end_date_dim})
       {% endcase -%}
-      then {{ _period_name }}
+      then
+      {%- if display_dates_in_period_labels._parameter_value == 'true' and '@{database_type}' == "mysql" %}
+      concat(
+      {%- endif -%}
+      {{ _period_name }}
 
       {%- if display_dates_in_period_labels._parameter_value == 'true' -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' (' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(${start_date_dim}, interval -{{ _range_start }} DAY))
-      {%- when "mysql" %} || ' (' || date_format(date_add(${start_date_dim}, interval -{{ _range_start }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' (', date_format(date_add(${start_date_dim}, interval -{{ _range_start }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %}  || ' (' || to_char(dateadd('days', -{{ _range_start }}, ${start_date_dim}), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
       {%- if _range_size != 1 -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' to ' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(${end_date_dim}, interval -{{ _range_end | minus: 1 }} DAY))
-      {%- when "mysql" %} || ' to ' || date_format(date_add(${end_date_dim}, interval -{{ _range_end }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' to ', date_format(date_add(${end_date_dim}, interval -{{ _range_end }} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' to ' || to_char(dateadd('days', -{{ _range_end | minus: 1 }}, ${end_date_dim}), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
-      {%- endif %} || ')'
+      {%- endif %}
+      {%- if '@{database_type}' == "mysql" %}
+      , ')')
+      {%- else %}
+      || ')'
+      {%- endif -%}
       {%- endif -%}
 
       {%- when 'prior_week' %}
@@ -890,22 +907,31 @@ view: main {
       {%- when "mysql" %} date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}} week) and date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}} day)
       {%- else %} dateadd('w',   -{{ i | minus: 1}}, dateadd('days', -{{ _range_start }}, ${start_date_dim})) and dateadd('w',   -{{ i | minus: 1}}, dateadd('days', -{{ _range_end }}, ${end_date_dim}))
       {%- endcase %}
-      then {{ _period_name }}
+      then
+      {%- if display_dates_in_period_labels._parameter_value == 'true' and '@{database_type}' == "mysql" %}
+      concat(
+      {%- endif -%}
+      {{ _period_name }}
 
       {%- if display_dates_in_period_labels._parameter_value == 'true' -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' (' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${start_date_dim}, interval -{{ _range_start }} DAY), interval -{{ i | minus: 1}} WEEK))
-      {%- when "mysql" %} || ' (' || date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}} week), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' (', date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}} week), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' (' || to_char(dateadd('w',   -{{ i | minus: 1}}, dateadd('days', -{{ _range_start }}, ${start_date_dim})), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
       {%- if _range_size != 1 -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' to ' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${end_date_dim}, interval -{{ _range_end }} DAY), interval  -{{ i | minus: 1}} WEEK))
-      {%- when "mysql" %} || ' to ' || date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}} week), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' to ', date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}} week), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' to ' || to_char(dateadd('w',   -{{ i | minus: 1}}, dateadd('days', -{{ _range_end }}, ${end_date_dim})), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
-      {%- endif %} || ')'
+      {%- endif %}
+      {%- if '@{database_type}' == "mysql" %}
+      , ')')
+      {%- else %}
+      || ')'
+      {%- endif -%}
       {%- endif -%}
 
       {%- when 'prior_month' %}
@@ -915,23 +941,32 @@ view: main {
       {%- when "mysql" %} date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}}*@{days_in_standard_month} day) and date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}}*@{days_in_standard_month} day)
       {%- else %} dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_month}, dateadd('days', -{{ _range_start }}, ${start_date_dim})) and dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_month}, dateadd('days', -{{ _range_end }}, ${end_date_dim}))
       {%- endcase %}
-      then '{{ _period_prefix | append: " " | append: _period_suffix }}'
+      then
+      {%- if display_dates_in_period_labels._parameter_value == 'true' and '@{database_type}' == "mysql" %}
+      concat(
+      {%- endif -%}
+      '{{ _period_prefix | append: " " | append: _period_suffix }}'
 
       {%- if display_dates_in_period_labels._parameter_value == 'true' -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' (' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${start_date_dim}, interval -{{ _range_start }} DAY), interval -{{ i | minus: 1}}*@{days_in_standard_month} DAY))
-      {%- when "mysql" %} || ' (' || date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}}*@{days_in_standard_month} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' (', date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}}*@{days_in_standard_month} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' (' || to_char(dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_month}, dateadd('days', -{{ _range_start }}, ${start_date_dim})) , '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
       {%- if _range_size != 1 -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' to ' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${end_date_dim}, interval -{{ _range_end }} DAY), interval -{{ i | minus: 1}}*@{days_in_standard_month} DAY))
-      {%- when "mysql" %} || ' to ' || date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}}*@{days_in_standard_month} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' to ', date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}}*@{days_in_standard_month} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' to ' || to_char(dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_month}, dateadd('days', -{{ _range_end }}, ${end_date_dim})) , '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
-      {%- endif %} || ')'
+      {%- endif %}
+      {%- if '@{database_type}' == "mysql" %}
+      , ')')
+      {%- else %}
+      || ')'
+      {%- endif -%}
       {%- endif -%}
 
       {%- when 'prior_quarter' %}
@@ -941,12 +976,16 @@ view: main {
       {%- when "mysql" %} date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} day)  and date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} day)
       {%- else %} dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_quarter}, dateadd('days', -{{ _range_start }}, ${start_date_dim}))  and dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_quarter}, dateadd('days', -{{ _range_end }}, ${end_date_dim}))
       {%- endcase %}
-      then '{{ _period_prefix | append: " " | append: _period_suffix }}'
+      then
+      {%- if display_dates_in_period_labels._parameter_value == 'true' and '@{database_type}' == "mysql" %}
+      concat(
+      {%- endif -%}
+      '{{ _period_prefix | append: " " | append: _period_suffix }}'
 
       {%- if display_dates_in_period_labels._parameter_value == 'true' -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' (' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${start_date_dim}, interval -{{ _range_start }} DAY), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} DAY))
-      {%- when "mysql" %} || ' (' || date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' (', date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' (' || to_char(dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_quarter}, dateadd('days', -{{ _range_start }}, ${start_date_dim})) , '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
 
       {%- endcase %}
@@ -954,11 +993,16 @@ view: main {
       {%- if _range_size != 1 -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' to ' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${end_date_dim}, interval -{{ _range_end }} DAY), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} DAY))
-      {%- when "mysql" %} || ' to ' || date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' to ', date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}}*@{days_in_standard_quarter} day), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' to ' || to_char(dateadd('days', -{{ i | minus: 1}}*@{days_in_standard_quarter}, dateadd('days', -{{ _range_end }}, ${end_date_dim})) , '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
-      {%- endif -%} || ')'
+      {%- endif -%}
+      {%- if '@{database_type}' == "mysql" %}
+      , ')')
+      {%- else %}
+      || ')'
+      {%- endif -%}
       {%- endif -%}
 
       {%- when 'prior_year' %}
@@ -968,24 +1012,32 @@ view: main {
       {%- when "mysql" %} date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}} year) and date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}} year)
       {%- else %} dateadd('yrs', -{{ i | minus: 1}}, dateadd('days', -{{ _range_start }}, ${start_date_dim})) and dateadd('yrs', -{{ i | minus: 1}}, dateadd('days', -{{ _range_end }}, ${end_date_dim}))
       {%- endcase %}
-      then '{{ _period_prefix | append: " " | append: _period_suffix }}'
+      then
+      {%- if display_dates_in_period_labels._parameter_value == 'true' and '@{database_type}' == "mysql" %}
+      concat(
+      {%- endif -%}
+      '{{ _period_prefix | append: " " | append: _period_suffix }}'
 
       {%- if display_dates_in_period_labels._parameter_value == 'true' -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' (' || format_date('@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${start_date_dim}, interval -{{ _range_start }} DAY), interval -{{ i | minus: 1}} YEAR))
-      {%- when "mysql" %} || ' (' || date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}} year), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' (', date_format(date_add(date_add(${start_date_dim}, interval -{{ _range_start }} day), interval -{{ i | minus: 1}} year), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' (' || to_char(dateadd('yrs', -{{ i | minus: 1}}, dateadd('days', -{{ _range_start }}, ${start_date_dim})), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
       {%- if _range_size != 1 -%}
       {%- case '@{database_type}' -%}
       {%- when "bigquery" %} || ' to ' || format_date( '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}', date_add(date_add(${end_date_dim}, interval -{{ _range_end }} DAY), interval -{{ i | minus: 1}} YEAR))
-      {%- when "mysql" %} || ' to ' || date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}} year), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
+      {%- when "mysql" %}, ' to ', date_format(date_add(date_add(${end_date_dim}, interval -{{ _range_end }} day), interval -{{ i | minus: 1}} year), '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- else %} || ' to ' || to_char(dateadd('yrs', -{{ i | minus: 1}}, dateadd('days', -{{ _range_end }}, ${end_date_dim})) , '@{date_display_format}{%- if show_time_in_date_display._parameter_value == 'true' %} @{time_display_format}{%- endif -%}')
       {%- endcase %}
 
       {%- endif -%}
+      {%- if '@{database_type}' == "mysql" %}
+      , ')')
+      {%- else %}
       || ')'
+      {%- endif -%}
       {%- endif -%}
 
       {%- endcase %}
